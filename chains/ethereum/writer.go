@@ -1,6 +1,7 @@
 package ethereum
 
 import (
+	"encoding/binary"
 	"math/big"
 
 	"github.com/ChainSafe/ChainBridgeV2/chains"
@@ -15,6 +16,7 @@ var _ chains.Writer = &Writer{}
 
 type Writer struct {
 	conn *Connection
+	nonce uint64
 }
 
 func NewWriter(conn *Connection) *Writer {
@@ -59,6 +61,42 @@ func (w *Writer) ResolveMessage(m msg.Message) {
 			big.NewInt(10), // TODO: gasPrice
 			calldata,
 		)
+	} else if m.Type == msg.DepositType {
+		log15.Info("sending asset transfer...", "to", w.conn.emitter, "msgdata", m.Data)
+		currBlock, err := w.conn.LatestBlock()
+		if err != nil {
+			panic(err)
+		}
+
+		address := ethcommon.HexToAddress(w.conn.kp.Public().Address())
+
+		nonce, err := w.conn.NonceAt(address, currBlock.Number())
+		if err != nil {
+			panic(err)
+		}
+
+		id := common.FunctionId("createDepositProposal(bytes32,uint256,uint256)")
+		calldata := append(id, m.Data...)
+
+		// add nonce to calldata and increment
+		nonceBytes := make([]byte, 32)
+		binary.LittleEndian.PutUint64(nonceBytes[24:], w.nonce)
+		calldata = append(calldata, nonceBytes...)
+		w.nonce += 1
+
+		// add origin chain to calldata
+		chainIdBytes := make([]byte, 32)
+		chainIdBytes[31] = uint8(m.Source)
+		calldata = append(calldata, chainIdBytes...)
+
+		tx = ethtypes.NewTransaction(
+			nonce,
+			w.conn.emitter,
+			big.NewInt(0),  // TODO: value?
+			1000000,        // TODO: gasLimit
+			big.NewInt(10), // TODO: gasPrice
+			calldata,
+		)		
 	} else {
 		panic("not implemented")
 	}

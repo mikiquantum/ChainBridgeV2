@@ -3,6 +3,7 @@ package msg
 type MessageType string
 
 var DepositAssetType MessageType = "centrifuge_deposit_asset"
+var GenericDepositType MessageType = "generic_deposit"
 
 // Message is used as a generic format to communicate between chains
 type Message struct {

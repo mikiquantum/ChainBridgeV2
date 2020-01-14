@@ -97,6 +97,11 @@ func (c *Connection) SubmitTx(data []byte) error {
 	return c.conn.SendTransaction(c.ctx, signedTx)
 }
 
+// PendingNonceAt returns the nonce of the given account and the given block
+func (c *Connection) PendingNonceAt(account [20]byte) (uint64, error) {
+	return c.conn.PendingNonceAt(c.ctx, ethcommon.Address(account))
+}
+
 // NonceAt returns the nonce of the given account and the given block
 func (c *Connection) NonceAt(account [20]byte, blockNum *big.Int) (uint64, error) {
 	return c.conn.NonceAt(c.ctx, ethcommon.Address(account), blockNum)

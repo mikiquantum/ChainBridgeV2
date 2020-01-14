@@ -24,6 +24,19 @@ func testMessage(t *testing.T) msg.Message {
 	}
 }
 
+func testGenericDepositMessage(t *testing.T) msg.Message {
+	// arbitrary hash
+	data, err := hex.DecodeString("b6e25575ab25a1938070eeb64ac4cd6df49af423327877522bec719815dc5e27")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return msg.Message{
+		Type: msg.GenericDepositType,
+		Data: data,
+	}
+}
+
 func TestResolveMessage(t *testing.T) {
 	m := testMessage(t)
 
@@ -108,4 +121,25 @@ func TestWriteToCentrifugeContract(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestReceiverContract(t *testing.T) {
+	m := testGenericDepositMessage(t)
+
+	cfg := &Config{
+		endpoint: TestEndpoint,
+		emitter:  TestCentrifugeContractAddress,
+		keystore: keystore.NewTestKeystore(),
+		from:     "ethereum",
+	}
+
+	conn := NewConnection(cfg)
+	err := conn.Connect()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	w := NewWriter(conn, cfg)
+	w.ResolveMessage(m)
 }

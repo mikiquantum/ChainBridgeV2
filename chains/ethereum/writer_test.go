@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"math/big"
 	"testing"
+	"time"
 
 	"github.com/ChainSafe/ChainBridgeV2/common"
 	"github.com/ChainSafe/ChainBridgeV2/crypto/secp256k1"
@@ -13,6 +14,8 @@ import (
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	ethparams "github.com/ethereum/go-ethereum/params"
 )
+
+var TestReceiverContractAddress = "f563197E48e62AE4ce194e89F7fCa67E05CFE5fC"
 
 func testMessage(t *testing.T) msg.Message {
 	// arbitrary hash
@@ -23,6 +26,19 @@ func testMessage(t *testing.T) msg.Message {
 
 	return msg.Message{
 		Type: msg.AssetTransferType,
+		Data: data,
+	}
+}
+
+func testDepositMessage(t *testing.T) msg.Message {
+	// arbitrary hash
+	data, err := hex.DecodeString("b6e25575ab25a1938070eeb64ac4cd6df49af423327877522bec719815dc5e27")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return msg.Message{
+		Type: msg.DepositType,
 		Data: data,
 	}
 }
@@ -65,6 +81,47 @@ func TestResolveMessage(t *testing.T) {
 	w := NewWriter(conn)
 	w.ResolveMessage(m)
 
+}
+
+func TestReceiverContract(t *testing.T) {
+	m := testDepositMessage(t)
+
+	ctx := context.Background()
+
+	signer := ethtypes.MakeSigner(ethparams.MainnetChainConfig, big.NewInt(0))
+	privBytes, err := hex.DecodeString(TestPrivateKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	priv, err := secp256k1.NewPrivateKey(privBytes)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	kp, err := secp256k1.NewKeypairFromPrivate(priv)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cfg := &ConnectionConfig{
+		Ctx:      ctx,
+		Endpoint: TestEndpoint,
+		Keypair:  kp,
+		Signer:   signer,
+		Receiver: TestReceiverContractAddress,
+	}
+
+	conn := NewConnection(cfg)
+	err = conn.Connect()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	w := NewWriter(conn)
+	w.ResolveMessage(m)
+
+	time.Sleep(time.Second)
 }
 
 func TestWriteToCentrifugeContract(t *testing.T) {

@@ -17,7 +17,6 @@ import (
 )
 
 var TestEmitterContractAddress = "1a5eA9856dE8966DF6f3aE55B5cC3CD5207537c8"
-//var TestReceiverContractAddress = "f563197E48e62AE4ce194e89F7fCa67E05CFE5fC"
 
 func newLocalConnection(t *testing.T, emitter string) *Connection {
 	ctx := context.Background()

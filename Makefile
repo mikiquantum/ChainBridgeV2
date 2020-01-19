@@ -46,7 +46,7 @@ test:
 	./scripts/test.sh
 	
 truffle_test:
-	@echo " > \033[32mTesting evm contracts... \033[0m "
+	@echo " > \033[32mTesting evm contracts... \033[s0m "
 	@cd contracts/evm-contracts && node_modules/.bin/truffle test
 
 truffle_compile:
@@ -60,6 +60,9 @@ start_eth:
 deploy_eth:
 	@echo " > \033[32mDeploying evm contracts... \033[0m "
 	./scripts/local_test/ethereum_deploy.sh
+
+docker_start:
+	./scripts/docker/start-docker.sh
 
 start_cent:
 	@echo " > \033[32mStarting centrifuge-chain... \033[0m "

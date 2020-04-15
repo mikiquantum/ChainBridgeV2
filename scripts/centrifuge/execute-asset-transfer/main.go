@@ -75,13 +75,13 @@ func main() {
 		panic(err)
 	}
 
-	key, err := types.CreateStorageKey(meta, "System", "AccountNonce", signature.TestKeyringPairAlice.PublicKey, nil)
+	key, err := types.CreateStorageKey(meta, "System", "Account", signature.TestKeyringPairAlice.PublicKey, nil)
 	if err != nil {
 		panic(err)
 	}
 
-	var nonce uint32
-	err = api.RPC.State.GetStorageLatest(key, &nonce)
+	var acc types.AccountInfo
+	_, err = api.RPC.State.GetStorageLatest(key, &acc)
 	if err != nil {
 		panic(err)
 	}
@@ -90,7 +90,7 @@ func main() {
 		BlockHash:   genesisHash,
 		Era:         types.ExtrinsicEra{IsMortalEra: false},
 		GenesisHash: genesisHash,
-		Nonce:       types.UCompact(nonce),
+		Nonce:       types.UCompact(acc.Nonce),
 		SpecVersion: rv.SpecVersion,
 		Tip:         0,
 	}

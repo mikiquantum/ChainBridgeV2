@@ -12,4 +12,4 @@ fi
 
 # Temporary repository until stable
 # Tailored image to not validate anchor or proofs
-docker run -p 9933:9933 -p 9944:9944 -p 30333:30333 mikiquantum/centrifuge-chain:latest centrifuge-chain --dev --ws-external --rpc-external
+docker run -p 9933:9933 -p 9944:9944 -p 30333:30333 centrifugeio/centrifuge-chain:20200408010334-6d0b73c centrifuge-chain --dev --ws-external --rpc-external --log=debug

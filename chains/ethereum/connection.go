@@ -56,6 +56,11 @@ func (c *Connection) Connect() error {
 	}
 
 	c.conn = ethclient.NewClient(rpcClient)
+	chainId, err := c.conn.ChainID(c.ctx)
+	if err != nil {
+		return err
+	}
+	c.signer = ethtypes.NewEIP155Signer(chainId)
 	return nil
 }
 

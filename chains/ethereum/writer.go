@@ -63,7 +63,7 @@ func (w *Writer) ResolveMessage(m msg.Message) {
 		// TODO: Make these configurable
 		big.NewInt(0),
 		6721975,
-		big.NewInt(45000000000),
+		big.NewInt(80000000000), //80 Gwei
 		calldata,
 	)
 
